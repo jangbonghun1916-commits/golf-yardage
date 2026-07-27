@@ -26,7 +26,7 @@
       <div class="map-card card">
         <div class="map-head">
           <div><span id="holeTitle">1번 홀</span><strong id="modeHelp">지도를 눌러 공 위치를 표시하세요</strong></div>
-          <div class="map-actions"><button id="undoBtn" class="ghost">되돌리기</button><button id="clearMarksBtn" class="ghost">표시 지우기</button></div>
+          <div class="map-actions"><button id="fullscreenBtn" class="ghost">확대 편집</button><button id="undoBtn" class="ghost">되돌리기</button><button id="clearMarksBtn" class="ghost">표시 지우기</button></div>
         </div>
         <div class="hole-guide">
           <div><small>REGULAR TEE</small><strong id="distanceDisplay">거리 확인 중</strong></div>
@@ -48,10 +48,10 @@
             <div id="markers" class="markers"></div>
           </div>
           <div class="zoom-controls" aria-label="도면 확대 축소">
-            <button id="zoomOutBtn" aria-label="축소">−</button><button id="zoomResetBtn">100%</button><button id="zoomInBtn" aria-label="확대">＋</button>
+            <button id="zoomOutBtn" aria-label="축소">−</button><button id="zoomResetBtn">100%</button><button id="zoomInBtn" aria-label="확대">＋</button><button id="exitEditBtn" aria-label="확대 편집 종료">✕</button>
           </div>
         </div>
-        <div class="legend"><span>● 공</span><span>⚑ 핀</span><span>➜ 목표</span><span>━ 공략선</span></div>
+        <div class="legend"><span>● 공</span><span>◆ 티박스</span><span>⚑ 핀</span><span>➜ 목표</span><span>━ 공략선</span></div>
       </div>
 
       <aside class="panel card">
@@ -64,6 +64,7 @@
         <p class="source-note batch-help">한 장 선택: 현재 홀에 등록 · 여러 장 선택: 선택한 순서대로 1홀부터 자동 등록</p>
         <div class="tools" role="group" aria-label="기록 도구">
           <button data-tool="ball" class="active"><b>●</b>공 위치</button>
+          <button data-tool="tee"><b>◆</b>티박스</button>
           <button data-tool="pin"><b>⚑</b>핀 위치</button>
           <button data-tool="target"><b>➜</b>목표 지점</button>
           <button data-tool="line"><b>／</b>공략선</button>
