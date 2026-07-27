@@ -17,7 +17,7 @@ const COURSES={
     }
   }
 };
-const state={tool:'ball',points:[],lineStart:null};
+const state={tool:'ball',points:[],lineStart:null,history:[],zoom:1};
 const selection=()=>({club:$('#courseName').value,loop:$('#courseLoop').value,hole:+$('#holeSelect').value});
 const key=()=>{const s=selection();return `yardage:v2:${s.club}:${s.loop}:${s.hole}`};
 const imageKey=()=>`${key()}:image`;
@@ -46,7 +46,7 @@ function load(){
   let data={};try{data=JSON.parse(localStorage.getItem(key()))||{}}catch{}
   const par=holeMeta().par[selection().hole-1]||4;
   $('#strategy').value=data.strategy||'';$('#putting').value=data.putting||'';$('#parSelect').value=data.par||String(par);
-  state.points=data.points||[];state.lineStart=null;render();renderNotes();updateImage();updateTitle();
+  state.points=data.points||[];state.lineStart=null;state.history=[];state.zoom=1;applyZoom();render();renderNotes();updateImage();updateTitle();
 }
 function updateTitle(){const s=selection(),meta=holeMeta(),meters=meta.distance?.[s.hole-1],yards=meters?Math.round(meters*1.09361):null;$('#holeTitle').textContent=`${s.club} · ${s.loop} ${s.hole}번 홀 · PAR ${$('#parSelect').value}`;$('#distanceDisplay').textContent=meters?`${meters} m · ${yards} yd`:'현장 거리 직접 기록';$('#officialStrategy').textContent=meta.tip?.[s.hole-1]||'공식 도면 또는 현장 경험을 바탕으로 아래 개인 공략 메모를 작성하세요.'}
 function render(){
@@ -57,9 +57,13 @@ function render(){
   });
 }
 function setTool(tool){state.tool=tool;state.lineStart=null;$$('.tools button').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));$('#modeHelp').textContent=tool==='line'?'시작점과 끝점을 차례로 누르세요':'지도를 눌러 위치를 표시하세요'}
+function remember(){state.history.push(JSON.stringify(state.points));if(state.history.length>30)state.history.shift()}
+function applyZoom(){const scene=$('#mapScene');if(scene)scene.style.transform=`scale(${state.zoom})`;if($('#zoomResetBtn'))$('#zoomResetBtn').textContent=`${Math.round(state.zoom*100)}%`}
 $$('.tools button').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
-$('#courseMap').addEventListener('pointerdown',e=>{const r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;if(state.tool==='line'){if(!state.lineStart){state.lineStart={x,y};$('#modeHelp').textContent='공략선의 끝점을 누르세요';return}state.points.push({type:'line',x:state.lineStart.x,y:state.lineStart.y,x2:x,y2:y});state.lineStart=null}else{if(['ball','pin'].includes(state.tool))state.points=state.points.filter(p=>p.type!==state.tool);state.points.push({type:state.tool,x,y})}render()});
-$('#undoBtn').onclick=()=>{state.points.pop();render()};
+$('#courseMap').addEventListener('pointerdown',e=>{if(e.target.closest('.zoom-controls'))return;const r=e.currentTarget.getBoundingClientRect(),sx=(e.clientX-r.left)/r.width*100,sy=(e.clientY-r.top)/r.height*100,x=50+(sx-50)/state.zoom,y=50+(sy-50)/state.zoom;if(x<0||x>100||y<0||y>100)return;if(state.tool==='line'){if(!state.lineStart){state.lineStart={x,y};$('#modeHelp').textContent='공략선의 끝점을 누르세요';return}remember();state.points.push({type:'line',x:state.lineStart.x,y:state.lineStart.y,x2:x,y2:y});state.lineStart=null}else{remember();if(['ball','pin'].includes(state.tool))state.points=state.points.filter(p=>p.type!==state.tool);state.points.push({type:state.tool,x,y})}render()});
+$('#undoBtn').onclick=()=>{if(!state.history.length){flash('되돌릴 표시가 없습니다.');return}state.points=JSON.parse(state.history.pop());state.lineStart=null;render();flash('이전 표시로 되돌렸습니다.')};
+$('#clearMarksBtn').onclick=()=>{if(!state.points.length){flash('지울 표시가 없습니다.');return}if(confirm('메모는 그대로 두고 도면의 표시만 모두 지울까요?')){remember();state.points=[];state.lineStart=null;render();flash('표시를 모두 지웠습니다. 되돌리기로 복구할 수 있어요.')}};
+$('#zoomInBtn').onclick=()=>{state.zoom=Math.min(3,state.zoom+.25);applyZoom()};$('#zoomOutBtn').onclick=()=>{state.zoom=Math.max(1,state.zoom-.25);applyZoom()};$('#zoomResetBtn').onclick=()=>{state.zoom=1;applyZoom()};
 $('#saveBtn').onclick=()=>{localStorage.setItem(key(),JSON.stringify(currentData()));flash('저장했습니다. 다음 방문에도 그대로 보여요.')};
 $('#clearBtn').onclick=()=>{if(confirm('현재 홀의 표시와 메모를 모두 지울까요?')){localStorage.removeItem(key());localStorage.removeItem(`${key()}:notes`);load();flash('현재 홀 기록을 지웠습니다.')}};
 function flash(msg){$('#saveStatus').textContent=msg;setTimeout(()=>$('#saveStatus').textContent='',2500)}

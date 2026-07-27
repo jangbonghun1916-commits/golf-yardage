@@ -26,15 +26,16 @@
       <div class="map-card card">
         <div class="map-head">
           <div><span id="holeTitle">1번 홀</span><strong id="modeHelp">지도를 눌러 공 위치를 표시하세요</strong></div>
-          <button id="undoBtn" class="ghost">되돌리기</button>
+          <div class="map-actions"><button id="undoBtn" class="ghost">되돌리기</button><button id="clearMarksBtn" class="ghost">표시 지우기</button></div>
         </div>
         <div class="hole-guide">
           <div><small>REGULAR TEE</small><strong id="distanceDisplay">거리 확인 중</strong></div>
           <div><small>기본 공략</small><p id="officialStrategy">홀 정보를 불러오는 중입니다.</p></div>
         </div>
         <div id="courseMap" class="course-map" aria-label="홀 공략 도면">
-          <img id="courseImage" class="course-image" alt="선택한 홀 코스 도면">
-          <svg class="course-art" viewBox="0 0 400 760" preserveAspectRatio="none" aria-hidden="true">
+          <div id="mapScene" class="map-scene">
+            <img id="courseImage" class="course-image" alt="선택한 홀 코스 도면">
+            <svg class="course-art" viewBox="0 0 400 760" preserveAspectRatio="none" aria-hidden="true">
             <defs><linearGradient id="fairway" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#5f9f55"/><stop offset="1" stop-color="#7fbb68"/></linearGradient></defs>
             <rect width="400" height="760" fill="#173d2b"/>
             <path d="M166 719 C122 631 127 566 170 503 C222 427 94 351 145 275 C188 213 196 147 177 82 L256 81 C282 154 264 225 222 288 C184 346 300 417 247 506 C207 572 255 650 235 719Z" fill="url(#fairway)"/>
@@ -43,8 +44,12 @@
             <ellipse cx="273" cy="272" rx="42" ry="18" fill="#e7d69b" transform="rotate(32 273 272)"/>
             <path d="M105 421 Q157 380 184 425 Q140 474 93 450Z" fill="#4e9ec3"/>
             <ellipse cx="200" cy="715" rx="48" ry="23" fill="#99c77b"/>
-          </svg>
-          <div id="markers" class="markers"></div>
+            </svg>
+            <div id="markers" class="markers"></div>
+          </div>
+          <div class="zoom-controls" aria-label="도면 확대 축소">
+            <button id="zoomOutBtn" aria-label="축소">−</button><button id="zoomResetBtn">100%</button><button id="zoomInBtn" aria-label="확대">＋</button>
+          </div>
         </div>
         <div class="legend"><span>● 공</span><span>⚑ 핀</span><span>➜ 목표</span><span>━ 공략선</span></div>
       </div>
