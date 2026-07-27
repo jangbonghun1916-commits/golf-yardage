@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#173d2b">
   <title>나의 골프 야디지</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css?v=14">
+  <link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body>
   <header class="topbar">
@@ -93,6 +93,10 @@
       <div><small>GREEN BOOK</small><h2 id="greenTitle">그린 공략</h2></div>
       <button id="closeGreenBtn">닫기</button>
     </header>
+    <div class="green-image-bar">
+      <label>그린 사진·안내도 등록<input id="greenImageUpload" type="file" accept="image/*"></label>
+      <button id="removeGreenImageBtn">등록 사진 제거</button>
+    </div>
     <div class="green-stage-wrap">
       <div id="greenStage" class="green-stage">
         <img id="greenBaseImage" class="green-base-image" alt="현재 홀 그린 주변 확대 도면">
@@ -117,6 +121,6 @@
   </section>
 
   <template id="markerTemplate"><span class="marker"></span></template>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>
