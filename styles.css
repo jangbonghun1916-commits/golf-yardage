@@ -5,3 +5,5 @@
 @media(max-width:760px){.selectors{grid-template-columns:1fr 1fr}.selectors label:first-child{grid-column:auto}.image-tools{flex-wrap:wrap}.image-tools>*{flex:1 1 45%}}
 .selectors>*,.workspace>*,.map-head>div{min-width:0}.map-head{gap:8px}.map-head .ghost{flex:0 0 auto}.map-head span{overflow-wrap:anywhere}
 .batch-help{margin-top:-8px!important;padding:8px 10px;border-radius:9px;background:#f3f5ec;color:#536258!important}
+.hole-guide{display:grid;grid-template-columns:130px 1fr;gap:12px;margin:0 0 12px;padding:12px 14px;border-radius:12px;background:#eff4e7;border:1px solid #dce5ce}.hole-guide small{display:block;color:var(--muted);font-size:.67rem;font-weight:850;letter-spacing:.06em}.hole-guide strong{display:block;margin-top:3px;font-size:1rem;color:var(--green)}.hole-guide p{margin:3px 0 0;font-size:.82rem;line-height:1.45;color:#33463a}
+@media(max-width:520px){.hole-guide{grid-template-columns:1fr}.hole-guide>div:first-child{border-bottom:1px solid #d7dfcd;padding-bottom:8px}}
