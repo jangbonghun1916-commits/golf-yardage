@@ -1,5 +1,5 @@
-const CACHE='my-yardage-v16';
-const FILES=['./','index.html','styles.css?v=16','app.js?v=16','manifest.json'];
+const CACHE='my-yardage-v17';
+const FILES=['./','index.html','styles.css?v=17','app.js?v=17','manifest.json'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
