@@ -17,7 +17,7 @@ const COURSES={
     }
   }
 };
-const state={tool:'ball',points:[],lineStart:null,history:[],zoom:1};
+const state={tool:'ball',points:[],lineStart:null,history:[],zoom:1,courseEdit:false,greenTool:'ball',greenPoints:[],greenHistory:[],greenLineStart:null};
 const selection=()=>({club:$('#courseName').value,loop:$('#courseLoop').value,hole:+$('#holeSelect').value});
 const key=()=>{const s=selection();return `yardage:v2:${s.club}:${s.loop}:${s.hole}`};
 const imageKey=()=>`${key()}:image`;
@@ -30,7 +30,7 @@ async function imageDelete(k){const db=await openImageDB();return new Promise((r
 for(let i=1;i<=9;i++) $('#holeSelect').add(new Option(`${i}번 홀`,i));
 function fillLoops(){const selected=$('#courseLoop').value,loops=Object.keys(COURSES[$('#courseName').value].loops);$('#courseLoop').innerHTML='';loops.forEach(v=>$('#courseLoop').add(new Option(`${v} 코스`,v)));if(loops.includes(selected))$('#courseLoop').value=selected}
 function holeMeta(){const s=selection();return COURSES[s.club].loops[s.loop]}
-function currentData(){return {par:$('#parSelect').value,strategy:$('#strategy').value,putting:$('#putting').value,points:state.points}}
+function currentData(){return {par:$('#parSelect').value,strategy:$('#strategy').value,putting:$('#putting').value,points:state.points,greenPoints:state.greenPoints}}
 function getNotes(){try{return JSON.parse(localStorage.getItem(`${key()}:notes`))||[]}catch{return []}}
 function defaultImage(){const s=selection(),meta=holeMeta(),path=s.club==='아크로CC'?`course-images/acro/${meta.slug}/${s.hole}.jpg`:'';return path&&window.EMBEDDED_IMAGES?.[path]||path}
 async function updateImage(){
@@ -46,7 +46,7 @@ function load(){
   let data={};try{data=JSON.parse(localStorage.getItem(key()))||{}}catch{}
   const par=holeMeta().par[selection().hole-1]||4;
   $('#strategy').value=data.strategy||'';$('#putting').value=data.putting||'';$('#parSelect').value=data.par||String(par);
-  state.points=data.points||[];state.lineStart=null;state.history=[];state.zoom=1;applyZoom();render();renderNotes();updateImage();updateTitle();
+  state.points=data.points||[];state.greenPoints=data.greenPoints||[];state.lineStart=null;state.greenLineStart=null;state.history=[];state.greenHistory=[];state.zoom=1;applyZoom();render();renderGreen();renderNotes();updateImage();updateTitle();
 }
 function updateTitle(){const s=selection(),meta=holeMeta(),meters=meta.distance?.[s.hole-1],yards=meters?Math.round(meters*1.09361):null;$('#holeTitle').textContent=`${s.club} · ${s.loop} ${s.hole}번 홀 · PAR ${$('#parSelect').value}`;$('#distanceDisplay').textContent=meters?`${meters} m · ${yards} yd`:'현장 거리 직접 기록';$('#officialStrategy').textContent=meta.tip?.[s.hole-1]||'공식 도면 또는 현장 경험을 바탕으로 아래 개인 공략 메모를 작성하세요.'}
 function render(){
@@ -58,9 +58,9 @@ function render(){
 }
 function setTool(tool){state.tool=tool;state.lineStart=null;$$('.tools button').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));$('#modeHelp').textContent=tool==='line'?'시작점과 끝점을 차례로 누르세요':'지도를 눌러 위치를 표시하세요'}
 function remember(){state.history.push(JSON.stringify(state.points));if(state.history.length>30)state.history.shift()}
-function applyZoom(){const scene=$('#mapScene');if(scene)scene.style.transform=`scale(${state.zoom})`;if($('#zoomResetBtn'))$('#zoomResetBtn').textContent=`${Math.round(state.zoom*100)}%`}
+function applyZoom(){const scene=$('#mapScene'),map=$('#courseMap');if(scene){const oldW=scene.scrollWidth||map.clientWidth,oldH=scene.scrollHeight||map.clientHeight,cx=(map.scrollLeft+map.clientWidth/2)/oldW,cy=(map.scrollTop+map.clientHeight/2)/oldH;scene.style.width=`${state.zoom*100}%`;scene.style.height=`${state.zoom*100}%`;requestAnimationFrame(()=>{map.scrollLeft=Math.max(0,cx*scene.scrollWidth-map.clientWidth/2);map.scrollTop=Math.max(0,cy*scene.scrollHeight-map.clientHeight/2)})}if($('#zoomResetBtn'))$('#zoomResetBtn').textContent=`${Math.round(state.zoom*100)}%`}
 $$('.tools button').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
-$('#courseMap').addEventListener('pointerdown',e=>{if(e.target.closest('.zoom-controls'))return;const r=e.currentTarget.getBoundingClientRect(),sx=(e.clientX-r.left)/r.width*100,sy=(e.clientY-r.top)/r.height*100,x=50+(sx-50)/state.zoom,y=50+(sy-50)/state.zoom;if(x<0||x>100||y<0||y>100)return;if(state.tool==='line'){if(!state.lineStart){state.lineStart={x,y};$('#modeHelp').textContent='공략선의 끝점을 누르세요';return}remember();state.points.push({type:'line',x:state.lineStart.x,y:state.lineStart.y,x2:x,y2:y});state.lineStart=null}else{remember();if(['ball','tee','pin'].includes(state.tool))state.points=state.points.filter(p=>p.type!==state.tool);state.points.push({type:state.tool,x,y})}render()});
+$('#courseMap').addEventListener('click',e=>{if(!state.courseEdit)return;if(e.target.closest('.zoom-controls'))return;const r=$('#mapScene').getBoundingClientRect(),x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;if(x<0||x>100||y<0||y>100)return;if(state.tool==='line'){if(!state.lineStart){state.lineStart={x,y};$('#modeHelp').textContent='공략선의 끝점을 누르세요';return}remember();state.points.push({type:'line',x:state.lineStart.x,y:state.lineStart.y,x2:x,y2:y});state.lineStart=null}else{remember();if(['ball','tee','pin'].includes(state.tool))state.points=state.points.filter(p=>p.type!==state.tool);state.points.push({type:state.tool,x,y})}render()});
 $('#undoBtn').onclick=()=>{if(!state.history.length){flash('되돌릴 표시가 없습니다.');return}state.points=JSON.parse(state.history.pop());state.lineStart=null;render();flash('이전 표시로 되돌렸습니다.')};
 $('#clearMarksBtn').onclick=()=>{if(!state.points.length){flash('지울 표시가 없습니다.');return}if(confirm('메모는 그대로 두고 도면의 표시만 모두 지울까요?')){remember();state.points=[];state.lineStart=null;render();flash('표시를 모두 지웠습니다. 되돌리기로 복구할 수 있어요.')}};
 $('#zoomInBtn').onclick=()=>{state.zoom=Math.min(5,state.zoom+.5);applyZoom()};$('#zoomOutBtn').onclick=()=>{state.zoom=Math.max(1,state.zoom-.5);applyZoom()};$('#zoomResetBtn').onclick=()=>{state.zoom=1;applyZoom()};
@@ -77,6 +77,16 @@ function escapeHtml(s){const d=document.createElement('div');d.textContent=s;ret
 $('#courseName').onchange=()=>{fillLoops();load()};$('#courseLoop').onchange=load;$('#holeSelect').onchange=load;$('#parSelect').onchange=updateTitle;
 $('#imageUpload').onchange=async e=>{const files=[...e.target.files];if(!files.length)return;const s=selection(),img=$('#courseImage');if(files.length===1){const file=files[0],selectedKey=imageKey(),instant=URL.createObjectURL(file);img.src=instant;img.style.display='block';$('.course-art').style.display='none';$('#mapSource').textContent=`${s.loop} ${s.hole}번 홀 사진을 저장하는 중입니다…`;try{await imagePut(selectedKey,file);if(selectedKey===imageKey()){await updateImage();flash(`${s.hole}번 홀 도면을 등록했습니다.`)}}catch{img.src=instant;$('#mapSource').textContent='사진은 표시했지만 이 브라우저에서 영구 저장이 제한되었습니다.';flash('사진을 표시했습니다.')}}else{const batch=files.slice(0,9);$('#mapSource').textContent=`1~${batch.length}번 홀 사진을 저장하는 중입니다…`;try{for(let i=0;i<batch.length;i++)await imagePut(imageKeyFor(s.club,s.loop,i+1),batch[i]);$('#holeSelect').value='1';await load();flash(`${s.loop} 코스 1~${batch.length}번 홀을 순서대로 등록했습니다.`)}catch{alert('사진 일괄 저장이 제한되었습니다. 브라우저에서 웹 주소로 실행해주세요.')}}e.target.value=''};
 $('#removeImageBtn').onclick=async()=>{try{await imageDelete(imageKey())}catch{}localStorage.removeItem(imageKey());await updateImage();flash('내 사진을 제거했습니다.')};
+function renderGreen(){const layer=$('#greenMarks');if(!layer)return;layer.innerHTML='';state.greenPoints.forEach(p=>{if(p.type==='putt'){const dx=p.x2-p.x,dy=p.y2-p.y,len=Math.hypot(dx,dy),angle=Math.atan2(dy,dx)*180/Math.PI,el=document.createElement('span');el.className='green-line';el.style.cssText=`left:${p.x}%;top:${p.y}%;width:${len}%;transform:rotate(${angle}deg)`;layer.append(el);return}const el=document.createElement('span');el.className=`green-mark ${p.type}`;el.style.left=`${p.x}%`;el.style.top=`${p.y}%`;el.textContent=p.type==='pin'?'⚑':p.type==='high'?'높음':p.type==='low'?'낮음':p.type==='slope'?'↘':'';layer.append(el)})}
+function rememberGreen(){state.greenHistory.push(JSON.stringify(state.greenPoints));if(state.greenHistory.length>30)state.greenHistory.shift()}
+function setGreenTool(tool){state.greenTool=tool;state.greenLineStart=null;$$('[data-green-tool]').forEach(b=>b.classList.toggle('active',b.dataset.greenTool===tool))}
+$$('[data-green-tool]').forEach(b=>b.onclick=()=>setGreenTool(b.dataset.greenTool));
+$('#openGreenBtn').onclick=()=>{const s=selection();$('#greenTitle').textContent=`${s.club} · ${s.loop} ${s.hole}번 홀 그린`;$('#greenEditor').hidden=false;document.body.classList.add('green-editor-open');renderGreen()};
+$('#closeGreenBtn').onclick=()=>{$('#greenEditor').hidden=true;document.body.classList.remove('green-editor-open')};
+$('#greenStage').addEventListener('click',e=>{const r=e.currentTarget.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;if(state.greenTool==='putt'){if(!state.greenLineStart){state.greenLineStart={x,y};return}rememberGreen();state.greenPoints.push({type:'putt',x:state.greenLineStart.x,y:state.greenLineStart.y,x2:x,y2:y});state.greenLineStart=null}else{rememberGreen();if(['ball','pin'].includes(state.greenTool))state.greenPoints=state.greenPoints.filter(p=>p.type!==state.greenTool);state.greenPoints.push({type:state.greenTool,x,y})}renderGreen()});
+$('#greenUndoBtn').onclick=()=>{if(!state.greenHistory.length)return;state.greenPoints=JSON.parse(state.greenHistory.pop());state.greenLineStart=null;renderGreen()};
+$('#greenClearBtn').onclick=()=>{if(!state.greenPoints.length)return;if(confirm('이 홀의 그린 표시를 모두 지울까요?')){rememberGreen();state.greenPoints=[];renderGreen()}};
+$('#greenSaveBtn').onclick=()=>{localStorage.setItem(key(),JSON.stringify(currentData()));$('#greenEditor').hidden=true;document.body.classList.remove('green-editor-open');flash('그린 공략을 저장했습니다.')};
 let installPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#installBtn').hidden=false});$('#installBtn').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('#installBtn').hidden=true}};
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 fillLoops();load();
