@@ -91,3 +91,4 @@ $('#greenSaveBtn').onclick=()=>{localStorage.setItem(key(),JSON.stringify(curren
 let installPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#installBtn').hidden=false});$('#installBtn').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('#installBtn').hidden=true}};
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 fillLoops();load();
+if(new URLSearchParams(location.search).get('green')==='1')setTimeout(()=>$('#openGreenBtn').click(),500);
