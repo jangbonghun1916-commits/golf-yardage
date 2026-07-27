@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#173d2b">
+  <title>나의 골프 야디지</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><small>MY COURSE NOTE</small><h1>나의 골프 야디지</h1></div>
+    <button id="installBtn" class="ghost" hidden>홈 화면 설치</button>
+  </header>
+
+  <main>
+    <section class="selectors card">
+      <label>골프장<select id="courseName"><option value="아크로CC">아크로CC</option><option value="어등산CC">어등산CC</option></select></label>
+      <label>코스<select id="courseLoop"></select></label>
+      <label>홀<select id="holeSelect"></select></label>
+      <label>파<select id="parSelect"><option>3</option><option selected>4</option><option>5</option></select></label>
+    </section>
+
+    <section class="workspace">
+      <div class="map-card card">
+        <div class="map-head">
+          <div><span id="holeTitle">1번 홀</span><strong id="modeHelp">지도를 눌러 공 위치를 표시하세요</strong></div>
+          <button id="undoBtn" class="ghost">되돌리기</button>
+        </div>
+        <div id="courseMap" class="course-map" aria-label="홀 공략 도면">
+          <img id="courseImage" class="course-image" alt="선택한 홀 코스 도면">
+          <svg class="course-art" viewBox="0 0 400 760" preserveAspectRatio="none" aria-hidden="true">
+            <defs><linearGradient id="fairway" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#5f9f55"/><stop offset="1" stop-color="#7fbb68"/></linearGradient></defs>
+            <rect width="400" height="760" fill="#173d2b"/>
+            <path d="M166 719 C122 631 127 566 170 503 C222 427 94 351 145 275 C188 213 196 147 177 82 L256 81 C282 154 264 225 222 288 C184 346 300 417 247 506 C207 572 255 650 235 719Z" fill="url(#fairway)"/>
+            <ellipse cx="216" cy="72" rx="69" ry="48" fill="#a7d77d"/>
+            <ellipse cx="167" cy="116" rx="28" ry="15" fill="#e7d69b" transform="rotate(-25 167 116)"/>
+            <ellipse cx="273" cy="272" rx="42" ry="18" fill="#e7d69b" transform="rotate(32 273 272)"/>
+            <path d="M105 421 Q157 380 184 425 Q140 474 93 450Z" fill="#4e9ec3"/>
+            <ellipse cx="200" cy="715" rx="48" ry="23" fill="#99c77b"/>
+          </svg>
+          <div id="markers" class="markers"></div>
+        </div>
+        <div class="legend"><span>● 공</span><span>⚑ 핀</span><span>➜ 목표</span><span>━ 공략선</span></div>
+      </div>
+
+      <aside class="panel card">
+        <h2>도면에 기록하기</h2>
+        <div class="image-tools">
+          <label class="upload-btn">홀 사진 가져오기<input id="imageUpload" type="file" accept="image/*" multiple></label>
+          <button id="removeImageBtn" class="ghost">내 사진 제거</button>
+        </div>
+        <p id="mapSource" class="source-note"></p>
+        <p class="source-note batch-help">한 장 선택: 현재 홀에 등록 · 여러 장 선택: 선택한 순서대로 1홀부터 자동 등록</p>
+        <div class="tools" role="group" aria-label="기록 도구">
+          <button data-tool="ball" class="active"><b>●</b>공 위치</button>
+          <button data-tool="pin"><b>⚑</b>핀 위치</button>
+          <button data-tool="target"><b>➜</b>목표 지점</button>
+          <button data-tool="line"><b>／</b>공략선</button>
+        </div>
+        <label>공략 메모<textarea id="strategy" rows="4" placeholder="예: 티샷은 왼쪽 벙커 우측 끝을 보고 공략"></textarea></label>
+        <label>퍼팅 메모<textarea id="putting" rows="4" placeholder="예: 뒤 핀은 내리막. 컵 한 개 오른쪽, 약하게"></textarea></label>
+        <div class="quick-notes">
+          <button>오르막</button><button>내리막</button><button>왼쪽 경사</button><button>오른쪽 경사</button><button>짧게 침</button><button>강하게</button>
+        </div>
+        <button id="saveBtn" class="primary">이 홀 기록 저장</button>
+        <button id="clearBtn" class="danger">현재 홀 기록 지우기</button>
+        <p id="saveStatus" class="status" aria-live="polite"></p>
+      </aside>
+    </section>
+
+    <section class="card history-card">
+      <div><h2>라운드 메모</h2><p>오늘의 결과를 남기면 다음 라운드에서 다시 볼 수 있습니다.</p></div>
+      <div class="history-input"><input id="roundNote" placeholder="예: 티샷 우측으로 밀림, 다음에는 짧은 클럽"><button id="addNoteBtn">추가</button></div>
+      <ul id="historyList"></ul>
+    </section>
+  </main>
+
+  <template id="markerTemplate"><span class="marker"></span></template>
+  <script src="app.js"></script>
+</body>
+</html>
